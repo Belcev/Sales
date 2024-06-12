@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+
+	<title>{ifset title}{include title|stripHtml} | {/ifset}Nette Framework Micro-blog</title>
+
+	<link rel="stylesheet" href="{$basePath}/css/style.css">
+</head>
+
+<body>
+<ul class="navig">
+	<li><a n:href="Homepage:">Homepage</a></li>
+</ul>
+
+	<div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
+
+	{include content}
+
+	<p class="footer">This is a <a href="http://doc.nette.org/quickstart">Nette Framework Quick Start</a>.</p>
+
+	{block scripts}
+	<script src="https://unpkg.com/nette-forms@3/src/assets/netteForms.js"></script>
+{/block}
+</body>
+</html>
