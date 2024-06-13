@@ -1,5 +1,26 @@
 {block content}
-	<h1 n:block="title">def</h1>
+	<div class="row">
 
+		{if $currentSales}
+			<div class="col-12">
+				<h2>{if count($currentSales) > 1 }Aktuální slevy {else} Aktuální sleva {/if}</h2>
+			</div>
+			{foreach $currentSales as $sale}
+				{include sale.latte, sale => $sale}
+			{/foreach}
 
+		{elseif $nextSale}
+
+			<div class="col-12">
+				<h2>Příští sleva</h2>
+			</div>
+			{include sale.latte, sale => $nextSale}
+
+		{else}
+			<div class="col-12">
+				<h2>Žádné slevy už nebudou</h2>
+			</div>
+		{/if}
+
+	</div>
 {/block}

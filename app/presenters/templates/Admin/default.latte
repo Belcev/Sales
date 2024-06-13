@@ -1,0 +1,21 @@
+{block content}
+	<a n:href="Login:logout" class="btn btn-warning" style="width: 10rem">odhlásit</a>
+
+	<div class="card my-3">
+		<div class="card-header">
+			<h3>Výprodeje</h3>
+		</div>
+		<div class="card-body">
+			{control salesGrid}
+		</div>
+	</div>
+
+	<div class="card my-3" n:if="$canSeeUsers">
+		<div class="card-header">
+			<h3>Uživatele</h3>
+		</div>
+		<div class="card-body">
+			{control userGrid}
+		</div>
+	</div>
+{/block}

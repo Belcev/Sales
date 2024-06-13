@@ -30,15 +30,29 @@
         "latte/latte": "^2.11 || ^3.0",
         "tracy/tracy": "^2.8",
 
-        "select2/select2": "*",
         "twbs/bootstrap": "*",
-        "ublaboo/datagrid": "*"
-
+        "ublaboo/datagrid": "*",
+        "fortawesome/font-awesome": "*"
     },
 
     "autoload": {
         "classmap": [
             "app/"
+        ]
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "cp -r vendor/twbs/bootstrap/dist/* www/assets/bootstrap",
+            "cp -r vendor/nette/forms/src/assets/* www/assets/netteForms",
+            "cp -r vendor/ublaboo/datagrid/assets/* www/assets/ublaboo",
+            "cp -r vendor/fortawesome/font-awesome/* www/assets/fontAwesome"
+
+        ],
+        "post-update-cmd": [
+            "cp -r vendor/twbs/bootstrap/dist/* www/assets/bootstrap",
+            "cp -r vendor/nette/forms/src/assets/* www/assets/netteForms",
+            "cp -r vendor/ublaboo/datagrid/assets/* www/assets/ublaboo",
+            "cp -r vendor/fortawesome/font-awesome/* www/assets/fontAwesome"
         ]
     },
     "minimum-stability": "stable"

@@ -1,6 +1,10 @@
 log
 temp
 vendor
+www/assets/bootstrap/*
+www/assets/netteForms/*
+www/assets/ublaboo/*
+www/assets/fontAwesome/*
 !.gitignore
 !.htaccess
 !web.config

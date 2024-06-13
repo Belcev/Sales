@@ -2,25 +2,25 @@
 
 namespace App\Presenters;
 
-//use App\Model\HomeModel;
-
+use App\Model\HomepageModel;
 use Nette\Application\UI\Presenter;
 
 class HomepagePresenter extends Presenter
 {
 
-//	private HomeModel $model;
+	private HomepageModel $model;
 
 	function __construct(
-//		HomeModel $model
+		HomepageModel $model
 	) {
-//		$this->model = $model;
+		$this->model = $model;
 		parent::__construct();
 	}
 
 
-
 	function renderDefault() {
+		$this->getTemplate()->currentSales = $this->model->getCurrentSales();
+		$this->getTemplate()->nextSale = $this->model->getNextSale();;
 	}
 
 

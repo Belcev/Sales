@@ -1,27 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="cs">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
 
-	<title>{ifset title}{include title|stripHtml} | {/ifset}Nette Framework Micro-blog</title>
+	<title>{ifset title}{include title|stripHtml} | {/ifset}Výprodej</title>
 
-	<link rel="stylesheet" href="{$basePath}/css/style.css">
+	<link rel="stylesheet" href="{$basePath}/assets/style.css">
+	<link href="{$basePath}/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" >
+	<link href="{$basePath}/assets/ublaboo/datagrid.css" rel="stylesheet" >
+	<link href="{$basePath}/assets/fontAwesome/css/all.css" rel="stylesheet" >
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+
 </head>
 
 <body>
-<ul class="navig">
-	<li><a n:href="Homepage:">Homepage</a></li>
-</ul>
 
-	<div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
-
-	{include content}
-
-	<p class="footer">This is a <a href="http://doc.nette.org/quickstart">Nette Framework Quick Start</a>.</p>
-
-	{block scripts}
-	<script src="https://unpkg.com/nette-forms@3/src/assets/netteForms.js"></script>
+{block scripts}
+	<script src="{$basePath}/assets/nette.ajax.js"></script>
+	<script>
+		$(function() {
+			$.nette.init();
+		});
+	</script>
+	<script src="{$basePath}/assets/netteForms/netteForms.js"></script>
+	<script src="{$basePath}/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="{$basePath}/assets/ublaboo/datagrid.js"></script>
+	<script src="{$basePath}/assets/fontAwesome/js/all.js"></script>
 {/block}
+
+	<div n:foreach="$flashes as $flash"
+			class="alert alert-{$flash->type} alert-dismissible fade show" role="alert">
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		{$flash->message|noescape}
+	</div>
+
+	<div class="container">
+		{include content}
+	</div>
 </body>
 </html>
