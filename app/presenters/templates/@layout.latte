@@ -10,25 +10,25 @@
 	<link href="{$basePath}/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" >
 	<link href="{$basePath}/assets/ublaboo/datagrid.css" rel="stylesheet" >
 	<link href="{$basePath}/assets/fontAwesome/css/all.css" rel="stylesheet" >
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-
 
 </head>
 
 <body>
 
 {block scripts}
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 	<script src="{$basePath}/assets/nette.ajax.js"></script>
 	<script>
 		$(function() {
 			$.nette.init();
 		});
 	</script>
+
 	<script src="{$basePath}/assets/netteForms/netteForms.js"></script>
 	<script src="{$basePath}/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
 	<script src="{$basePath}/assets/ublaboo/datagrid.js"></script>
 	<script src="{$basePath}/assets/fontAwesome/js/all.js"></script>
+	<script src="{$basePath}/assets/timer.js"></script>
 {/block}
 
 	<div n:foreach="$flashes as $flash"

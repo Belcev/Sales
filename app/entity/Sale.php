@@ -14,6 +14,8 @@ class Sale
 	public \DateTime $activeTo;
 	public string $color;
 
+	public array $tags = [];
+
 	public function __construct(
 		int $id,
 		string $name,
@@ -34,5 +36,9 @@ class Sale
 		$this->activeFrom = $activeFrom;
 		$this->activeTo = $activeTo;
 		$this->color = $color;
+	}
+
+	public function setTags(array $tags) {
+		$this->tags = $tags;
 	}
 }

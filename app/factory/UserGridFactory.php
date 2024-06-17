@@ -6,6 +6,7 @@ use Nette\Application\UI\Presenter;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
 use Nette\Forms\Container;
+use Nette\Utils\Html;
 use Ublaboo\DataGrid\DataGrid;
 
 class UserGridFactory
@@ -22,174 +23,119 @@ class UserGridFactory
 	function getUserGrid(Presenter $presenter) : DataGrid {
 		$grid = new DataGrid();
 
-		$grid->setDataSource($this->database->table('sale'));
+		$grid->setDataSource($this->database->table('user'));
 		$grid->setItemsPerPageList([20, 50, 100], true);
 
-		$grid->addColumnText('id', 'Id')
-			->setSortable();
-
-		$grid->addColumnText('name', 'Jméno')
-			->setSortable()
-			->setFilterText();
-
-		$grid->addColumnText('created_by_id', 'Vložil Uživatel')
-			->setRenderer(function ($row) {
-				return $this->database->table('user')->get($row->created_by_id)->name;
-			});
-
-		$grid->addColumnDateTime('created_at', 'Vložil Datum')
-			->setSortable()
-			->setFilterDateRange();
-
-		$grid->addColumnDateTime('active_from', 'Aktivní od')
-			->setSortable()
-			->setFilterDateRange();
-
-		$grid->addColumnDateTime('active_to', 'Aktivní do')
-			->setSortable()
-			->setFilterDateRange();
-
-		$grid->addColumnDateTime('color', 'barva')
-			->setFilterDateRange();
-
-		// vazba Tag a Sale je M:N vyjádřená v tabulce sale_tag
-		$grid->addColumnText('tags', 'Tagy')
-			->setRenderer(function ($row) {
-				$tags = [];
-				foreach ($this->database->table('sale_tag')->where('sale_id', $row->id) as $sale_tag) {
-					$tags[] = $this->database->table('tag')->get($sale_tag->tag_id)->name;
-				}
-				return implode(', ', $tags);
-			});
-
-		$grid->setDefaultSort(['created_at' => 'ASC']);
-
-
-		$this->newSaleLine($grid, $presenter);
-		$this->editSaleLine($grid, $presenter);
-		$this->addActionDelete($grid);
-
-
+		$this->getGrid($grid);
+		$this->newLine($grid, $presenter);
+		$this->editLine($grid, $presenter);
+		$this->addActionDelete($grid, $presenter);
+		$this->addActionPassword($grid);
+		$this->addActionActivate($grid, $presenter);
+		$this->setColor($grid, $presenter);
 		return $grid;
 	}
 
+	private function getGrid(DataGrid $grid) {
+		$grid->addColumnText('id', 'Id')
+			->setSortable();
 
-	private function newSaleLine(DataGrid $grid, Presenter $presenter) {
+		$grid->addColumnText('username', 'Uživatelské jméno')
+			->setSortable()
+			->setFilterText();
+
+		$grid->addColumnText('role', 'Role')
+			->setFilterSelect(['admin' => 'admin', 'user' => 'user']);
+
+		$grid->addColumnText('first_name', 'Jméno')
+			->setSortable()
+			->setFilterText();
+
+		$grid->addColumnText('last_name', 'Příjmení')
+			->setSortable()
+			->setFilterText();
+
+		$grid->addColumnText('active', 'Aktivní')
+			->setRenderer(function (ActiveRow $row) {
+				return $row->active ? 'Ano' : 'Ne';
+			})
+			->setFilterSelect(['1' => 'Ano', '0' => 'Ne']);
+	}
+
+
+	private function newLine(DataGrid $grid, Presenter $presenter) {
 		$inlineAdd = $grid->addInlineAdd();
 
 		$inlineAdd->setPositionTop()
 			->onControlAdd[] = function (Container $container): void {
-			$container->addText('name', 'Jméno')
+			$container->addText('username', 'Uživatelské jméno')
 				->setRequired('%label je potřeba vyplnit');
 
-			$container->addDateTime('active_from', 'Aktivní od')
+			$container->addSelect('role', 'Role', ['admin' => 'admin', 'user' => 'user']);
+
+			$container->addText('first_name', 'Jméno')
 				->setRequired('%label je potřeba vyplnit');
 
-			$container->addDateTime('active_to', 'Aktivní do')
+			$container->addText('last_name', 'Příjmení')
 				->setRequired('%label je potřeba vyplnit');
-
-			$container->addColor('color', 'barva')
-				->setRequired('%label je potřeba vyplnit');
-
-			$container->addMultiSelect('tags' , 'Tagy', $this->database->table('tag')->fetchPairs('id', 'name'))
-				->setHtmlAttribute('class', 'form-select')
-				->setRequired('Je potřeba vybrat alespoň jeden Tag');
 
 		};
 
 		$inlineAdd->onSubmit[] = function ($values) use ($presenter): void {
 
-			$newRow = $this->database->table('sale')->insert(
+			$this->database->table('user')->insert(
 				[
-					'name' => $values['name'],
-					'active_from' => $values['active_from'],
-					'active_to' => $values['active_to'],
-					'color' => str_replace('#', '', $values['color']),
-					'created_by_id' => $presenter->getUser()->getId(),
-					'created_at' => new \DateTime(),
-					'updated_by_id' => $presenter->getUser()->getId(),
-					'updated_at' => new \DateTime(),
+					'username' => $values['username'],
+					'role' => $values['role'],
+					'first_name' => $values['first_name'],
+					'last_name' => $values['last_name'],
+					'active' => 0,
 				]
 			);
-
-
-			if ($values['tags']) {
-				$this->database->table('sale_tag')->insert(
-					array_map(function ($tag_id) use ($newRow) {
-						return [
-							'sale_id' => $newRow->id,
-							'tag_id' => $tag_id,
-						];
-					}, $values['tags']));
-			}
 
 			$presenter->flashMessage('přidáno', 'success');
 			$presenter->redrawControl('flashes');
 		};
 	}
 
-	private function editSaleLine(DataGrid $grid, Presenter $presenter) {
+	private function editLine(DataGrid $grid, Presenter $presenter) {
 		$inlineEdit = $grid->addInlineEdit();
 
 		$inlineEdit->onControlAdd[] = function (Container $container): void {
-			$container->addText('name', 'Jméno')
+			$container->addText('username', 'Uživatelské jméno')
 				->setRequired('%label je potřeba vyplnit');
 
-			$container->addDateTime('active_from', 'Aktivní od')
+			$container->addSelect('role', 'Role', ['admin' => 'admin', 'user' => 'user']);
+
+			$container->addText('first_name', 'Jméno')
 				->setRequired('%label je potřeba vyplnit');
 
-			$container->addDateTime('active_to', 'Aktivní do')
+			$container->addText('last_name', 'Příjmení')
 				->setRequired('%label je potřeba vyplnit');
-
-			$container->addColor('color', 'barva')
-				->setRequired('%label je potřeba vyplnit');
-
-			$container->addMultiSelect('tags' , 'Tagy', $this->database->table('tag')->fetchPairs('id', 'name'))
-				->setHtmlAttribute('class', 'form-select')
-				->setRequired('Je potřeba vybrat alespoň jeden Tag');
 		};
 
 		$inlineEdit->onSetDefaults[] = function (Container $container, ActiveRow $values): void {
 			$container->setDefaults([
-				'name' => $values['name'],
-				'active_from' => $values['active_from'],
-				'active_to' => $values['active_to'],
-				'color' => str_replace('#', '', $values['color']),
-				'tags' => $this->database->table('sale_tag')->where('sale_id', $values->id)->fetchPairs('tag_id', 'tag_id'),
+				'username' => $values['username'],
+				'role' => $values['role'],
+				'first_name' => $values['first_name'],
+				'last_name' => $values['last_name'],
 			]);
 		};
 
 		$inlineEdit->onSubmit[] = function ($id, $values) use ($presenter): void {
 
-			$this->database->table('sale')
+			$this->database->table('user')
 				->where('id', $id)
 				->update(
 					[
-						'id' => $id, // id je potřeba pro where, jinak by se mohlo stát, že by se změnilo id na 'null
-						'name' => $values['name'],
-						'active_from' => $values['active_from'],
-						'active_to' => $values['active_to'],
-						'color' => str_replace('#', '', $values['color']),
-						'updated_by_id' => $presenter->getUser()->getId(),
-						'updated_at' => new \DateTime(),
+						'id' => $id,
+						'username' => $values['username'],
+						'role' => $values['role'],
+						'first_name' => $values['first_name'],
+						'last_name' => $values['last_name'],
 					]
 				);
-
-
-			$tags = $this->database->table('sale_tag')->where('sale_id', $id);
-			if($tags->count() > 0) {
-				$tags->delete();
-			}
-
-			if ($values['tags']) {
-				$this->database->table('sale_tag')->insert(
-					array_map(function ($tag_id) use ($id) {
-						return [
-							'sale_id' => $id,
-							'tag_id' => $tag_id,
-						];
-					}, $values['tags']));
-			}
 
 
 			$presenter->flashMessage('Record was updated!', 'success');
@@ -200,10 +146,51 @@ class UserGridFactory
 
 	}
 
-	private function addActionDelete(DataGrid $grid) {
-		$grid->addAction('delete', '', 'DeleteSale!', ['id' => 'id'])
+	private function addActionDelete(DataGrid $grid, Presenter $presenter) {
+		$grid->addAction('delete', '', 'DeleteUser!', ['id' => 'id'])
 			->setIcon('trash')
 			->setTitle('Delete')
-			->setClass('btn btn-xs btn-danger ajax');
+			->setClass('btn btn-xs btn-danger ajax')
+			->setRenderCondition(function (ActiveRow $row) use ($presenter): bool {
+				return $row->id !== $presenter->user->id;
+			});
+	}
+
+	private function addActionPassword(DataGrid $grid) {
+		$grid->addAction('password', '', 'ChangePassword!', ['user_id' => 'id'])
+			->setIcon('key')
+			->setTitle('Change password')
+			->setClass('btn btn-xs btn-warning ajax');
+	}
+
+	private function addActionActivate(DataGrid $grid, Presenter $presenter) {
+		$grid->addAction('active', '', 'ActivateUser!', ['id' => 'id', 'active' => 'active'])
+			->setIcon('check')
+			->setTitle('Aktivovat')
+			->setClass('btn btn-xs btn-success ajax')
+			->setRenderCondition(function (ActiveRow $row) use ($presenter): bool {
+				return $row->id !== $presenter->user->id && $row->active == false;
+			});
+
+		$grid->addAction('deactive', '', 'ActivateUser!', ['id' => 'id', 'active' => 'active'])
+			->setIcon('xmark')
+			->setTitle('Deaktivovat')
+			->setClass('btn btn-xs btn-warning ajax')
+			->setRenderCondition(function (ActiveRow $row) use ($presenter): bool {
+				return $row->id !== $presenter->user->id &&  $row->active == true;
+			});
+	}
+
+	private function setColor(DataGrid $grid, Presenter $presenter) {
+		$grid->setRowCallback(function($item, Html $tr) use ($presenter) {
+			switch (true) {
+				case $item->id == $presenter->user->id:
+					$tr->addClass('table-success');
+					break;
+				case !$item->active:
+					$tr->addClass('table-secondary');
+					break;
+			}
+		});
 	}
 }

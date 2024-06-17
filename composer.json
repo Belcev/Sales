@@ -45,14 +45,15 @@
             "cp -r vendor/twbs/bootstrap/dist/* www/assets/bootstrap",
             "cp -r vendor/nette/forms/src/assets/* www/assets/netteForms",
             "cp -r vendor/ublaboo/datagrid/assets/* www/assets/ublaboo",
-            "cp -r vendor/fortawesome/font-awesome/* www/assets/fontAwesome"
-
+            "cp -r vendor/fortawesome/font-awesome/* www/assets/fontAwesome",
+            "rm -r temp/*"
         ],
         "post-update-cmd": [
             "cp -r vendor/twbs/bootstrap/dist/* www/assets/bootstrap",
             "cp -r vendor/nette/forms/src/assets/* www/assets/netteForms",
             "cp -r vendor/ublaboo/datagrid/assets/* www/assets/ublaboo",
-            "cp -r vendor/fortawesome/font-awesome/* www/assets/fontAwesome"
+            "cp -r vendor/fortawesome/font-awesome/* www/assets/fontAwesome",
+            "rm -r temp/*"
         ]
     },
     "minimum-stability": "stable"

@@ -1,7 +1,7 @@
 CREATE DATABASE sales;
 
-    -- nastavení kodování pro vytvořenou databázi
-    ALTER DATABASE sales CHARACTER SET utf8 COLLATE utf8_general_ci;
+-- nastavení kodování pro vytvořenou databázi
+ALTER DATABASE sales CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 
 CREATE TABLE user (
@@ -44,15 +44,24 @@ CREATE TABLE sale_tag (
     FOREIGN KEY (tag_id) REFERENCES tag(id)
 );
 
-
-
-INSERT INTO `user` (`id`, `username`, `password`, `role`, `first_name`, `last_name`, `active`)
-VALUES (NULL, 'admin', '$2y$10$yc6InJOxVWAom.3Xy9zloOoXKzqq/GIblSpuSmvqFTasP6woP.ota', 'admin', 'admin', 'admin', '1'); -- heslo: admin
+INSERT INTO `user` (`id`, `username`, `password`, `role`, `first_name`, `last_name`, `active`) VALUES
+    (NULL, 'admin', '$2y$10$yc6InJOxVWAom.3Xy9zloOoXKzqq/GIblSpuSmvqFTasP6woP.ota', 'admin', 'admin', 'admin', '1'), -- heslo: admin
+    (NULL, 'user', '$2y$10$EPu1Vo0fxNy4Vxec3KivaeEAfS6PNv8Hg2nbqdFCSyXA2v.npXoXe', 'user', 'user', 'user', '0'); -- heslo: TajneHeslo !je potřeba Aktivovat!
 
 INSERT INTO `tag` (`id`, `name`) VALUES (NULL, 'RPG'), (NULL, 'Survival'), (NULL, 'Open World'), (NULL, 'Platformer'), (NULL, '3D Střílečka');
 
-INSERT INTO `sale` (`id`, `name`, `created_at`, `created_by_id`, `updated_at`, `updated_by_id`, `active_from`, `active_to`, `color`) VALUES (NULL, 'Léto 2024', CURRENT_TIMESTAMP, '1', CURRENT_TIMESTAMP, '1', '2024-06-21 00:00:00.000000', '2024-09-21 00:00:00.000000', '00FF00');
-INSERT INTO `sale` (`id`, `name`, `created_at`, `created_by_id`, `updated_at`, `updated_by_id`, `active_from`, `active_to`, `color`) VALUES (NULL, 'Jaro 2024', CURRENT_TIMESTAMP, '1', CURRENT_TIMESTAMP, '1', '2024-03-21 00:00:00.000000', '2024-06-21 00:00:00.000000', 'FFFF00');
+ALTER TABLE sale AUTO_INCREMENT = 1;
 
-INSERT INTO `sale_tag` (`id`, `sale_id`, `tag_id`) VALUES (NULL, '1', '1'), (NULL, '1', '2');
-INSERT INTO `sale_tag` (`id`, `sale_id`, `tag_id`) VALUES (NULL, '2', '3'), (NULL, '2', '4');
+INSERT INTO `sale` (`id`, `name`, `created_at`, `created_by_id`, `updated_at`, `updated_by_id`, `active_from`, `active_to`, `color`) VALUES
+    (NULL, 'Zima 2024', CURRENT_TIMESTAMP, '1', CURRENT_TIMESTAMP, '1', '2023-12-21 00:00:00.000000', '2024-03-21 00:00:00.000000', 'B3DAF1'),
+    (NULL, 'Jaro 2024', CURRENT_TIMESTAMP, '1', CURRENT_TIMESTAMP, '1', '2024-03-21 00:00:00.000000', '2024-06-21 00:00:00.000000', 'FFFF00'),
+    (NULL, 'Léto 2024', CURRENT_TIMESTAMP, '1', CURRENT_TIMESTAMP, '1', '2024-06-21 00:00:00.000000', '2024-09-21 00:00:00.000000', '00FF00'),
+    (NULL,'Podzim 2024',CURRENT_TIMESTAMP, '1', CURRENT_TIMESTAMP, '1', '2024-09-21 00:00:00.000000', '2024-12-21 00:00:00.000000', 'E36414'),
+    (NULL, 'Zima 2025', CURRENT_TIMESTAMP, '1', CURRENT_TIMESTAMP, '1', '2024-12-21 00:00:00.000000', '2025-03-21 00:00:00.000000', 'B3DAF1');
+
+INSERT INTO `sale_tag` (`id`, `sale_id`, `tag_id`) VALUES
+    (NULL, '1', '1'), (NULL, '1', '2'),
+    (NULL, '2', '2'), (NULL, '2', '3'),
+    (NULL, '3', '3'), (NULL, '3', '4'),
+    (NULL, '4', '4'), (NULL, '4', '5'),
+    (NULL, '5', '1'), (NULL, '5', '4');

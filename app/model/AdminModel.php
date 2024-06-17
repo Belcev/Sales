@@ -6,8 +6,6 @@ use App\Factory\SaleGridFactory;
 use App\Factory\UserGridFactory;
 use Nette\Application\UI\Presenter;
 use Nette\Database\Explorer;
-use Nette\Database\Table\ActiveRow;
-use Nette\Forms\Container;
 use Ublaboo\DataGrid\DataGrid;
 
 class AdminModel {
@@ -40,8 +38,19 @@ class AdminModel {
 		return $this->userGridFactory->getUserGrid($presenter);
 	}
 
-	function deleteSale($id) {
+	function doActivateUser(int $id, bool $active) {
+		$this->database
+			->table('user')
+			->where('id', $id)
+			->update(['active' => $active]);
+	}
+
+	function doDeleteSale(int $id) {
 		$this->database->table('sale_tag')->where('sale_id', $id)->delete();
 		$this->database->table('sale')->where('id', $id)->delete();
+	}
+
+	function doDeleteUser(int $id) {
+		$this->database->table('user')->where('id', $id)->delete();
 	}
 }

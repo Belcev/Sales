@@ -6,4 +6,5 @@ services:
 
 	- App\Factory\SaleGridFactory
 	- App\Factory\UserGridFactory
+	- App\Factory\PassEditFormFactory
 

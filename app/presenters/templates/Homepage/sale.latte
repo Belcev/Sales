@@ -1,18 +1,27 @@
-
 <div class="col-12">
-	<div class="card">
-		<div class="card-header">
-			<h3 class="card-title">{$sale->name}</h3>
+	<div class="card my-1">
+		<div class="card-header" style="background-color: #{$sale->color}">
+			<h3 class="card-title" >{$sale->name}</h3>
 		</div>
 		<div class="card-body">
 			<div class="row">
-				<div class="col-12">
-					<p>Created at: {$sale->createdAt|date}</p>
-					<p>Active from: {$sale->activeFrom|date}</p>
-					<p>Active to: {$sale->activeTo|date}</p>
-					<p>Color: #{$sale->color}</p>
+				<span n:foreach="$sale->tags as $tag" class="col-1 badge bg-secondary m-1">{$tag}</span>
+			</div>
+			<div class="row">
+				<div n:if="$sale->activeFrom < new Nette\Utils\DateTime() && $sale->activeTo > new Nette\Utils\DateTime()" class="col-12">
+					<h3> Do konce zbývá </h3>
+					<div class="countdown" data-timeTo="{$sale->activeTo|date:'Y-m-d\\TH:i:s'}"></div>
+				</div>
+				<div n:if="$sale->activeFrom > new Nette\Utils\DateTime()" class="col-12">
+					<h3> Do začátku zbývá </h3>
+					<div class="countdown" data-timeTo="{$sale->activeFrom|date:'Y-m-d\\TH:i:s'}"></div>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
+
+
+<script>
+
+</script>

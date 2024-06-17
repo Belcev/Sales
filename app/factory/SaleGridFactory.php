@@ -2,7 +2,6 @@
 
 namespace App\Factory;
 
-use Generated\User;
 use Nette\Application\UI\Presenter;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
@@ -27,6 +26,22 @@ class SaleGridFactory
 		$grid->setDataSource($this->database->table('sale'));
 		$grid->setItemsPerPageList([20, 50, 100], true);
 
+
+		$this->getGrid($grid);
+
+		$grid->setDefaultSort(['active_from' => 'ASC']);
+
+
+		$this->newSaleLine($grid, $presenter);
+		$this->editSaleLine($grid, $presenter);
+		$this->addActionDelete($grid);
+		$this->setColor($grid);
+
+
+		return $grid;
+	}
+
+	private function getGrid(DataGrid $grid) {
 		$grid->addColumnText('id', 'Id')
 			->setSortable();
 
@@ -63,36 +78,7 @@ class SaleGridFactory
 				}
 				return implode(', ', $tags);
 			});
-
-		$grid->setDefaultSort(['created_at' => 'ASC']);
-
-
-		$this->newSaleLine($grid, $presenter);
-		$this->editSaleLine($grid, $presenter);
-		$this->addActionDelete($grid);
-
-		$grid->setRowCallback(function($item, Html $tr) {
-			$now = new \DateTime();
-			switch (true) {
-				case $item->active_from > $item->active_to:
-					$tr->addClass('table-danger');
-					break;
-				case $item->active_from >= $now:
-					$tr->addClass('table-info');
-					break;
-				case $item->active_to <= $now:
-					$tr->addClass('table-warning');
-					break;
-				default:
-					$tr->addClass('table-success');
-					break;
-			}
-		});
-
-
-		return $grid;
 	}
-
 
 	private function newSaleLine(DataGrid $grid, Presenter $presenter) {
 		$inlineAdd = $grid->addInlineAdd();
@@ -106,11 +92,7 @@ class SaleGridFactory
 				->setRequired('%label je potřeba vyplnit');
 
 			$container->addDateTime('active_to', 'Aktivní do')
-				->setRequired('%label je potřeba vyplnit')
-				// musí být větší než active_from
-				->addRule( function ($item) use ($container) {
-					return $item->value > $container['active_from']->value;
-				}, 'Aktivní do musí být větší než Aktivní od');
+				->setRequired('%label je potřeba vyplnit');
 
 			$container->addColor('color', 'barva')
 				->setRequired('%label je potřeba vyplnit');
@@ -184,7 +166,6 @@ class SaleGridFactory
 		};
 
 		$inlineEdit->onSubmit[] = function ($id, $values) use ($presenter): void {
-
 			$this->database->table('sale')
 				->where('id', $id)
 				->update(
@@ -229,5 +210,27 @@ class SaleGridFactory
 			->setIcon('trash')
 			->setTitle('Delete')
 			->setClass('btn btn-xs btn-danger ajax');
+	}
+
+
+
+	private function setColor(DataGrid $grid) {
+		$grid->setRowCallback(function($item, Html $tr) {
+			$now = new \DateTime();
+			switch (true) {
+				case $item->active_from > $item->active_to:
+					$tr->addClass('table-danger'); // chybné
+					break;
+				case $item->active_from >= $now:
+					$tr->addClass('table-info'); // budoucí
+					break;
+				case $item->active_to <= $now:
+					$tr->addClass('table-warning'); // minulé
+					break;
+				default:
+					$tr->addClass('table-success'); // aktivní
+					break;
+			}
+		});
 	}
 }

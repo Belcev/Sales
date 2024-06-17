@@ -22,12 +22,14 @@ class MyAuthenticator implements Nette\Security\Authenticator
 
 	function authenticate(string $username, string $password): SimpleIdentity {
 
-		$row = $this->database->table('user')
-			->where('username', $username)
+		$row = $this->database
+			->table('user')
+			->where('username ', $username)
+			->where('active', 1)
 			->fetch();
 
 		if (!$row || !$this->passwords->verify($password, $row->password)) {
-			throw new Nette\Security\AuthenticationException('Kombinace jmena a Hesla není správná.', self::INVALID_CREDENTIAL);
+			throw new Nette\Security\AuthenticationException('Kombinace jmena a Hesla není správná nebo není uživatel Aktivován', self::INVALID_CREDENTIAL);
 		}
 
 		return new SimpleIdentity(

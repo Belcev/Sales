@@ -42,7 +42,7 @@ class HomepageModel {
 
 	private function mapRowToSale($row): Sale
 	{
-		return new Sale(
+		$sale = new Sale(
 			$row->id,
 			$row->name,
 			new \DateTime($row->created_at),
@@ -53,6 +53,25 @@ class HomepageModel {
 			new \DateTime($row->active_to),
 			$row->color
 		);
+
+		return $this->fillTags($row, $sale);
+	}
+
+
+	private function fillTags($row, $sale) {
+		// získej tagy z tabuky tag podle m:n tabulky sale_tag
+		$tags = $this->database
+			->table('sale_tag')
+			->where('sale_id', $row->id)
+			->fetchAll();
+
+		$possibleTags = $this->database->table('tag')->fetchPairs('id', 'name');;
+		$tags = array_map(function($tag) use ($possibleTags) {
+			return $possibleTags[$tag->tag_id];
+		}, $tags);
+		$sale->setTags($tags);
+
+		return $sale;
 	}
 
 
