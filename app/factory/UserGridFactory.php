@@ -24,7 +24,7 @@ class UserGridFactory
 		$grid = new DataGrid();
 
 		$grid->setDataSource($this->database->table('user'));
-		$grid->setItemsPerPageList([20, 50, 100], true);
+		$grid->setItemsPerPageList([5, 10, 30], true);
 
 		$this->getGrid($grid);
 		$this->newLine($grid, $presenter);

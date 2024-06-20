@@ -18,7 +18,11 @@ document.addEventListener('DOMContentLoaded', function() {
 			const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
 			// Zobrazení výsledku v elementu
-			countdownElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+			let d = days > 0 ? `${days} dní ` : '';
+			let h = hours < 10 ? '0' + hours : hours;
+			let m = minutes < 10 ? '0' + minutes : minutes;
+			let s = seconds < 10 ? '0' + seconds : seconds;
+			countdownElement.attributes['data-value'].value = `${d}${h}:${m}:${s}`;
 
 			// Pokud je odpočítávání u konce, zobrazíme zprávu
 			if (distance < 0) {

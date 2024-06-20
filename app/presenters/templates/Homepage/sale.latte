@@ -1,6 +1,6 @@
 <div class="col-12">
 	<div class="card my-1">
-		<div class="card-header" style="background-color: #{$sale->color}">
+		<div class="card-header text-center" style="background-color: #{$sale->color}">
 			<h3 class="card-title" >{$sale->name}</h3>
 		</div>
 		<div class="card-body">
@@ -8,13 +8,27 @@
 				<span n:foreach="$sale->tags as $tag" class="col-1 badge bg-secondary m-1">{$tag}</span>
 			</div>
 			<div class="row">
-				<div n:if="$sale->activeFrom < new Nette\Utils\DateTime() && $sale->activeTo > new Nette\Utils\DateTime()" class="col-12">
+				<div n:if="$sale->activeFrom < new Nette\Utils\DateTime() && $sale->activeTo > new Nette\Utils\DateTime()" class="col-12 text-center">
 					<h3> Do konce zbývá </h3>
-					<div class="countdown" data-timeTo="{$sale->activeTo|date:'Y-m-d\\TH:i:s'}"></div>
+					<div class="tick countdown"
+						 style="font-size: 5rem;"
+						 data-timeTo="{$sale->activeTo|date:'Y-m-d\\TH:i:s'}"
+						 data-value="">
+						<div data-repeat="true" aria-hidden="true">
+							<span data-view="flip"></span>
+						</div>
+					</div>
 				</div>
-				<div n:if="$sale->activeFrom > new Nette\Utils\DateTime()" class="col-12">
+				<div n:if="$sale->activeFrom > new Nette\Utils\DateTime()" class="col-12 text-center">
 					<h3> Do začátku zbývá </h3>
-					<div class="countdown" data-timeTo="{$sale->activeFrom|date:'Y-m-d\\TH:i:s'}"></div>
+					<div class="tick countdown"
+						 style="font-size: 5rem;"
+						 data-timeTo="{$sale->activeFrom|date:'Y-m-d\\TH:i:s'}"
+						 data-value="">
+						<div data-repeat="true" aria-hidden="true">
+							<span data-view="flip"></span>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

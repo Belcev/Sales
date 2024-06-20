@@ -24,7 +24,7 @@ class LoginPresenter extends Presenter {
 			->setRequired('Prosím zadejte své heslo.');
 
 		$form->addSubmit('send', 'Login')
-			->setHtmlAttribute('class', 'btn btn-outline-success');
+			->setHtmlAttribute('class', 'btn btn-outline-success w-100  ');
 
 		$form->onSuccess[] = function (Form $form, \stdClass $values) {
 			try {

@@ -24,7 +24,7 @@ class SaleGridFactory
 		$grid = new DataGrid();
 
 		$grid->setDataSource($this->database->table('sale'));
-		$grid->setItemsPerPageList([20, 50, 100], true);
+		$grid->setItemsPerPageList([5, 10, 30], true);
 
 
 		$this->getGrid($grid);
@@ -66,8 +66,13 @@ class SaleGridFactory
 			->setSortable()
 			->setFilterDateRange();
 
-		$grid->addColumnDateTime('color', 'barva')
-			->setFilterDateRange();
+		$grid->addColumnText('color', 'barva')
+			->setRenderer(function ($row) {
+				$rgb = str_split($row->color, 2);
+				$rgb = array_map('hexdec', $rgb);
+				$rgb = implode(', ', $rgb);
+				return "#{$row->color} ($rgb)";
+			});
 
 		// vazba Tag a Sale je M:N vyjádřená v tabulce sale_tag
 		$grid->addColumnText('tags', 'Tagy')
