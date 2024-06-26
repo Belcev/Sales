@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Presenters;
+namespace App\AdminModule\Presenters;
 
-use Nette\Application\UI\Presenter;
 use Nette\Application\UI\Form;
+use Nette\Application\UI\Presenter;
 use Nette\Security\AuthenticationException;
 
 class LoginPresenter extends Presenter {
@@ -29,7 +29,7 @@ class LoginPresenter extends Presenter {
 		$form->onSuccess[] = function (Form $form, \stdClass $values) {
 			try {
 				$this->getUser()->login($values->login, $values->password);
-				$this->redirect('Admin:');
+				$this->redirect('Homepage:');
 			} catch (AuthenticationException $e) {
 				$form->addError($e->getMessage());
 			}

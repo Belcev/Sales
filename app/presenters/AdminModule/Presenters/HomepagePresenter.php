@@ -1,27 +1,34 @@
 <?php
 
-namespace App\Presenters;
+namespace App\AdminModule\Presenters;
 
 use App\Factory\PassEditFormFactory;
-use App\Model\AdminModel;
+use App\Factory\SaleGridFactory;
+use App\Factory\UserGridFactory;
+use App\Model\SaleModel;
+use App\Model\UserModel;
 use Nette\Application\UI\Form;
 use Nette\Application\UI\Presenter;
 use Ublaboo\DataGrid\DataGrid;
 
 
-class AdminPresenter extends Presenter {
+class HomepagePresenter extends Presenter {
 
-	private AdminModel $model;
-	private PassEditFormFactory $passEditFormFactory;
+	/** UserModel @inject */
+	public UserModel $userModel;
 
-	function __construct(
-		AdminModel $model,
-		PassEditFormFactory $passEditFormFactory
-	) {
-		$this->model = $model;
-		$this->passEditFormFactory = $passEditFormFactory;
-		parent::__construct();
-	}
+	/** SaleModel @inject  */
+	public SaleModel $saleModel;
+
+	/** SaleGridFactory @inject  */
+	public SaleGridFactory $saleGridFactory;
+
+	/** UserGridFactory @inject  */
+	public UserGridFactory $userGridFactory;
+
+	/** PassEditFormFactory @inject  */
+	public PassEditFormFactory $passEditFormFactory;
+
 
 
 	protected function startup(): void {
@@ -32,8 +39,7 @@ class AdminPresenter extends Presenter {
 	}
 
 	function actionDefault() {
-		$this->getTemplate()->canSeeUsers = $this->model->canUserSeeUsers($this->user->id);
-		$this->getTemplate()->showModal = false;
+		$this->getTemplate()->canSeeUsers = $this->userModel->canUserSeeUsers($this->user->id);
 	}
 
 	private function checkAdmin() {
@@ -45,16 +51,16 @@ class AdminPresenter extends Presenter {
 
 
 	function createComponentSalesGrid(): DataGrid {
-		return $this->model->getSalesGrid($this);
+		return $this->saleGridFactory->getSalesGrid($this);
 	}
 
 	function createComponentUserGrid(): DataGrid {
-		return $this->model->getUserGrid($this);
+		return $this->userGridFactory->getUserGrid($this);
 	}
 
 	function handleDeleteSale($id) {
 		try {
-			$this->model->doDeleteSale($id);
+			$this->saleModel->doDeleteSale($id);
 			$this->flashMessage('Smazáno', 'success');
 		} catch (\Exception $e) {
 			$this->flashMessage('Nepodařilo se smazat Slevu', 'danger');
@@ -70,7 +76,7 @@ class AdminPresenter extends Presenter {
 		}
 
 		try {
-			$this->model->doDeleteUser($id);
+			$this->userModel->doDeleteUser($id);
 			$this->flashMessage('Smazáno', 'success');
 		} catch (\Exception $e) {
 			$this->flashMessage('Nelze smazat uživatele, který je evidován u nějaké Slevy', 'danger');
@@ -99,7 +105,7 @@ class AdminPresenter extends Presenter {
 
 	function handleActivateUser($id, $active) {
 		$this->checkAdmin();
-		$this->model->doActivateUser($id, !$active);
+		$this->userModel->doActivateUser($id, !$active);
 		$this->redirect('this');
 	}
 

@@ -1,8 +1,9 @@
 services:
 	router: App\Router\RouterFactory::createRouter
 	authenticator: App\Security\MyAuthenticator
-	- App\Model\HomepageModel
-	- App\Model\AdminModel
+	- App\Model\SaleModel
+	- App\Model\TagModel
+	- App\Model\UserModel
 
 	- App\Factory\SaleGridFactory
 	- App\Factory\UserGridFactory

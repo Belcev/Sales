@@ -2,28 +2,35 @@
 
 namespace App\Factory;
 
+use App\Model\SaleModel;
+use App\Model\TagModel;
+use App\Model\UserModel;
 use Nette\Application\UI\Presenter;
-use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
 use Nette\Forms\Container;
 use Nette\Utils\Html;
 use Ublaboo\DataGrid\DataGrid;
 
-class SaleGridFactory
-{
+class SaleGridFactory {
 
-	private Explorer $database;
+	private SaleModel $saleModel;
+	private TagModel $tagModel;
+	private UserModel $userModel;
 
 	function __construct(
-		Explorer $database
+		SaleModel $saleModel,
+		TagModel $tagModel,
+		UserModel $userModel
 	){
-		$this->database = $database;
+		$this->saleModel = $saleModel;
+		$this->tagModel = $tagModel;
+		$this->userModel = $userModel;
 	}
 
 	function getSalesGrid(Presenter $presenter) : DataGrid {
 		$grid = new DataGrid();
 
-		$grid->setDataSource($this->database->table('sale'));
+		$grid->setDataSource($this->saleModel->getTable());
 		$grid->setItemsPerPageList([5, 10, 30], true);
 
 
@@ -50,9 +57,7 @@ class SaleGridFactory
 			->setFilterText();
 
 		$grid->addColumnText('created_by_id', 'Vložil Uživatel')
-			->setRenderer(function ($row) {
-				return $this->database->table('user')->get($row->created_by_id)->name;
-			});
+			->setRenderer(fn($row) => $this->userModel->getUserName($row->created_by_id));
 
 		$grid->addColumnDateTime('created_at', 'Vložil Datum')
 			->setSortable()
@@ -76,13 +81,7 @@ class SaleGridFactory
 
 		// vazba Tag a Sale je M:N vyjádřená v tabulce sale_tag
 		$grid->addColumnText('tags', 'Tagy')
-			->setRenderer(function ($row) {
-				$tags = [];
-				foreach ($this->database->table('sale_tag')->where('sale_id', $row->id) as $sale_tag) {
-					$tags[] = $this->database->table('tag')->get($sale_tag->tag_id)->name;
-				}
-				return implode(', ', $tags);
-			});
+			->setRenderer(fn($row) => implode(', ', $this->tagModel->getTagsBySaleId($row->id)));
 	}
 
 	private function newSaleLine(DataGrid $grid, Presenter $presenter) {
@@ -102,38 +101,14 @@ class SaleGridFactory
 			$container->addColor('color', 'barva')
 				->setRequired('%label je potřeba vyplnit');
 
-			$container->addMultiSelect('tags' , 'Tagy', $this->database->table('tag')->fetchPairs('id', 'name'))
+			$container->addMultiSelect('tags' , 'Tagy', $this->tagModel->getPossibleTags())
 				->setHtmlAttribute('class', 'form-select')
 				->setRequired('Je potřeba vybrat alespoň jeden Tag');
 
 		};
 
 		$inlineAdd->onSubmit[] = function ($values) use ($presenter): void {
-
-			$newRow = $this->database->table('sale')->insert(
-				[
-					'name' => $values['name'],
-					'active_from' => $values['active_from'],
-					'active_to' => $values['active_to'],
-					'color' => str_replace('#', '', $values['color']),
-					'created_by_id' => $presenter->getUser()->getId(),
-					'created_at' => new \DateTime(),
-					'updated_by_id' => $presenter->getUser()->getId(),
-					'updated_at' => new \DateTime(),
-				]
-			);
-
-
-			if ($values['tags']) {
-				$this->database->table('sale_tag')->insert(
-					array_map(function ($tag_id) use ($newRow) {
-						return [
-							'sale_id' => $newRow->id,
-							'tag_id' => $tag_id,
-						];
-					}, $values['tags']));
-			}
-
+			$this->saleModel->doInsert($values, $presenter->getUser()->getId());
 			$presenter->flashMessage('přidáno', 'success');
 			$presenter->redrawControl('flashes');
 		};
@@ -155,7 +130,7 @@ class SaleGridFactory
 			$container->addColor('color', 'barva')
 				->setRequired('%label je potřeba vyplnit');
 
-			$container->addMultiSelect('tags' , 'Tagy', $this->database->table('tag')->fetchPairs('id', 'name'))
+			$container->addMultiSelect('tags' , 'Tagy', $this->tagModel->getPossibleTags())
 				->setHtmlAttribute('class', 'form-select')
 				->setRequired('Je potřeba vybrat alespoň jeden Tag');
 		};
@@ -166,42 +141,12 @@ class SaleGridFactory
 				'active_from' => $values['active_from'],
 				'active_to' => $values['active_to'],
 				'color' => str_replace('#', '', $values['color']),
-				'tags' => $this->database->table('sale_tag')->where('sale_id', $values->id)->fetchPairs('tag_id', 'tag_id'),
+				'tags' => $this->tagModel->getTagsIdBySaleId($values->id),
 			]);
 		};
 
 		$inlineEdit->onSubmit[] = function ($id, $values) use ($presenter): void {
-			$this->database->table('sale')
-				->where('id', $id)
-				->update(
-					[
-						'id' => $id, // id je potřeba pro where, jinak by se mohlo stát, že by se změnilo id na 'null
-						'name' => $values['name'],
-						'active_from' => $values['active_from'],
-						'active_to' => $values['active_to'],
-						'color' => str_replace('#', '', $values['color']),
-						'updated_by_id' => $presenter->getUser()->getId(),
-						'updated_at' => new \DateTime(),
-					]
-				);
-
-
-			$tags = $this->database->table('sale_tag')->where('sale_id', $id);
-			if($tags->count() > 0) {
-				$tags->delete();
-			}
-
-			if ($values['tags']) {
-				$this->database->table('sale_tag')->insert(
-					array_map(function ($tag_id) use ($id) {
-						return [
-							'sale_id' => $id,
-							'tag_id' => $tag_id,
-						];
-					}, $values['tags']));
-			}
-
-
+			$this->saleModel->doEdit($id, $values, $presenter->getUser()->getId());
 			$presenter->flashMessage('Record was updated!', 'success');
 			$presenter->redrawControl('flashes');
 		};

@@ -1,0 +1,14 @@
+{block content}
+	<a n:href="Login:logout" class="btn btn-warning pull-end" style="width: 10rem">odhlásit</a>
+	<a n:href="User:" n:if="$canSeeUsers" class="btn btn-info pull-end" style="width: 10rem">Uživatele</a>
+	<a n:href=":Homepage:default" class="btn btn-info pull-end" style="width: 10rem">Homepage</a>
+
+	<div class="card my-3">
+		<div class="card-header">
+			<h3>Výprodeje</h3>
+		</div>
+		<div class="card-body">
+			{control salesGrid}
+		</div>
+	</div>
+{/block}

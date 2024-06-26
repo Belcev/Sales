@@ -1,6 +1,8 @@
 {block content}
 	<div class="row">
 
+		<a n:href="Admin:Homepage:default" class="btn btn-info pull-end" style="width: 10rem">Administrace</a>
+
 		{if $currentSales}
 			<div class="col-12">
 				<h2>{if count($currentSales) > 1 }Aktuální slevy {else} Aktuální sleva {/if}</h2>

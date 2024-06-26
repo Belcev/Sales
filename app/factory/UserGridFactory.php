@@ -2,6 +2,7 @@
 
 namespace App\Factory;
 
+use App\Model\UserModel;
 use Nette\Application\UI\Presenter;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
@@ -9,21 +10,20 @@ use Nette\Forms\Container;
 use Nette\Utils\Html;
 use Ublaboo\DataGrid\DataGrid;
 
-class UserGridFactory
-{
+class UserGridFactory {
 
-	private Explorer $database;
+	private UserModel $userModel;
 
 	function __construct(
-		Explorer $database
+		UserModel $userModel
 	){
-		$this->database = $database;
+		$this->userModel = $userModel;
 	}
 
 	function getUserGrid(Presenter $presenter) : DataGrid {
 		$grid = new DataGrid();
 
-		$grid->setDataSource($this->database->table('user'));
+		$grid->setDataSource($this->userModel->getTable());
 		$grid->setItemsPerPageList([5, 10, 30], true);
 
 		$this->getGrid($grid);
@@ -56,9 +56,7 @@ class UserGridFactory
 			->setFilterText();
 
 		$grid->addColumnText('active', 'Aktivní')
-			->setRenderer(function (ActiveRow $row) {
-				return $row->active ? 'Ano' : 'Ne';
-			})
+			->setRenderer(fn(ActiveRow $row) => $row->active ? 'Ano' : 'Ne')
 			->setFilterSelect(['1' => 'Ano', '0' => 'Ne']);
 	}
 
@@ -82,17 +80,7 @@ class UserGridFactory
 		};
 
 		$inlineAdd->onSubmit[] = function ($values) use ($presenter): void {
-
-			$this->database->table('user')->insert(
-				[
-					'username' => $values['username'],
-					'role' => $values['role'],
-					'first_name' => $values['first_name'],
-					'last_name' => $values['last_name'],
-					'active' => 0,
-				]
-			);
-
+			$this->userModel->doInsert($values);
 			$presenter->flashMessage('přidáno', 'success');
 			$presenter->redrawControl('flashes');
 		};
@@ -124,20 +112,7 @@ class UserGridFactory
 		};
 
 		$inlineEdit->onSubmit[] = function ($id, $values) use ($presenter): void {
-
-			$this->database->table('user')
-				->where('id', $id)
-				->update(
-					[
-						'id' => $id,
-						'username' => $values['username'],
-						'role' => $values['role'],
-						'first_name' => $values['first_name'],
-						'last_name' => $values['last_name'],
-					]
-				);
-
-
+			$this->userModel->doEdit($id, $values);
 			$presenter->flashMessage('Record was updated!', 'success');
 			$presenter->redrawControl('flashes');
 		};

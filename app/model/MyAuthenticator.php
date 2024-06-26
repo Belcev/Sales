@@ -2,40 +2,36 @@
 
 namespace App\Security;
 
-use Nette;
-use Nette\Database\Explorer;
+use App\Model\UserModel;
+use Nette\Security\AuthenticationException;
+use Nette\Security\Authenticator;
 use Nette\Security\Passwords;
 use Nette\Security\SimpleIdentity;
 
-class MyAuthenticator implements Nette\Security\Authenticator
-{
-	private Explorer $database;
+class MyAuthenticator implements Authenticator {
+	private UserModel $userModel;
 	private Passwords $passwords;
 
+
 	function __construct(
-		Explorer $database,
+		UserModel $userModel,
 		Passwords $passwords
+
 	) {
-		$this->database = $database;
+		$this->userModel = $userModel;
 		$this->passwords = $passwords;
 	}
 
 	function authenticate(string $username, string $password): SimpleIdentity {
-
-		$row = $this->database
-			->table('user')
-			->where('username ', $username)
-			->where('active', 1)
-			->fetch();
-
-		if (!$row || !$this->passwords->verify($password, $row->password)) {
-			throw new Nette\Security\AuthenticationException('Kombinace jmena a Hesla není správná nebo není uživatel Aktivován', self::INVALID_CREDENTIAL);
+		$user = $this->userModel->getActiveUserByUsername($username);
+		if (!$user || !$this->passwords->verify($password, $user->password)) {
+			throw new AuthenticationException('Kombinace jmena a Hesla není správná nebo není uživatel Aktivován', self::INVALID_CREDENTIAL);
 		}
 
 		return new SimpleIdentity(
-			$row->id,
-			$row->role, // nebo pole více rolí
-			['name' => $row->username]
+			$user->id,
+			$user->role, // nebo pole více rolí
+			['name' => $user->username]
 		);
 	}
 }
